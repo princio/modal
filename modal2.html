@@ -1,0 +1,317 @@
+<html>
+<head>
+   <meta charset="UTF-8">
+   <script
+			  src="https://code.jquery.com/jquery-3.4.1.min.js"
+			  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+			  crossorigin="anonymous"></script>
+   <title>Curriculum Lorenzo Principi</title>
+   <style>
+   @page {
+		size: A4;
+		margin: 0;
+	}
+	
+	body{
+		box-sizing: border-box;
+		font-size:12px;
+		font-family: monospace;
+		margin: 0;
+		padding: 0;
+		/*position: relative;*/
+		width: 100%;
+		height: 100%;
+		font-weight: 500;
+    }
+	.page {
+		box-sizing: border-box;
+		width: 210mm;
+		height: 297mm;
+		font-size:12px;
+		font-family: monospace;
+		padding: 1cm 2cm 1cm 1.5cm;
+		margin: 0;
+		display:block; 
+		page-break-before:always; 
+	}
+    .note {
+		height: 25px;
+		width: 25px;
+		border-radius: 50%;
+		display: inline-block;
+		position: relative;
+		margin: 3px 2px;
+	}
+    .chord_name {
+		height: 25px;
+		width: 25px;
+		border-radius: 20%;
+		display: inline-block;
+		position: relative;
+		margin: 3px 2px;
+		background-color: black;
+		color: white;
+		font-weight: 1200;
+	}
+	.chord_name span {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+	}
+    .chord {
+		display: flex;
+	}
+    .note span {
+	  position: absolute;
+	  left: 50%;
+	  top: 50%;
+	  transform: translate(-50%, -50%);
+	}
+    .nonote {
+		height: 25px;
+		width: 25px;
+		visibility: hidden;
+		border-radius: 50%;
+		display: inline-block;
+		margin: 3px 2px;
+	}
+    .fretboards {
+		display: flex;
+		flex-direction: column;
+        flex-wrap: wrap;
+	}
+	.fretboards > div {
+		display: flex;
+		flex-direction: row;
+	}
+	.mode {
+		font-size: 20px;
+	}
+    .fretboard {
+	  display: flex;
+	  flex-direction: row;
+	}
+    .fret {
+	  display: flex;
+	  flex-direction: column;
+	  border: 1px dashed lightgray;
+	  padding: 0;	
+	  margin: 0 10px;
+	}
+	.fretboard > div {
+		text-align: center;
+	}
+	.fretboard > div:nth-child(4) > .fret,
+	.fretboard > div:nth-child(6) > .fret,
+	.fretboard > div:nth-child(8) > .fret,
+	.fretboard > div:nth-child(10) > .fret,
+	.fretboard > div:nth-child(13) > .fret	{
+	  background-color: #ddd;
+	}
+	.fretboard > div:nth-child(6) > .fret	{
+	  background-color: lightsteelblue;
+	}
+	.fretboard > div:nth-child(8) > .fret	{
+	  background-color: lightgreen;
+	}
+	.fretboard > div:first-child .note,
+	.fretboard > div:first-child .nonote {
+	  height: 25px;
+	  width: 15px;
+	  background-color: brown;
+	  border-radius: 10%;
+	  color: white;	
+	  border: none;
+	}
+	.fretboard > div:first-child > .fret {
+	  border-right: 1px solid black;
+	  border: none;
+	}
+	.fretnum {
+		font-weight: 800;
+	}
+	.tonic {
+	  background-color: red;
+	}
+	.tonic > span {
+	  font-weight: bold;
+	}
+    .note.orange {
+	  background-color: red;
+	  font-weight: bold;
+	  color: white;
+	}
+    .note.red {
+	  background-color: red;
+	  font-weight: bold;
+	  color: white;
+	}
+    .note.yellow {
+		background-color: yellow;	}
+	.note.blue {
+		background-color: rgba(50, 50, 240, 0.3);
+	}
+	.note.blu {
+	  background-color: blue;
+		color: white;
+	}
+    .note.purple {
+		background-color: purple;
+		color: white;
+	}
+    .note.green {
+		background-color: green;
+		color: white;
+	}
+    .note.bno{
+		width: 15px;
+		height: 15px;
+		margin: 8px 7px;
+		font-size: 8px;
+	}
+   </style>
+</head>
+<body>
+
+<select onchange="makeFreatboard(this.value)">
+<option>C</option>
+<option>C#</option>
+<option>D</option>
+<option>D#</option>
+<option>E</option>
+<option>F</option>
+<option>F#</option>
+<option>G</option>
+<option>G#</option>
+<option>A</option>
+<option>A#</option>
+<option>B</option>
+</select>
+
+<div style="display: flex; flex-direction: row;">
+	<div class="fretboards"></div>
+	<div class="chords"></div>
+</div>
+
+<script>
+var notes = [ "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" ];
+
+var colors = [ "red", "purple", "blu", "blue", "yellow", "orange", "blue" ];
+
+var bords = [ "byes", "byes", "byes", "bno", "byes", "byes", "bno" ];
+
+var major = [ 2, 2, 1, 2, 2, 2 ];
+var minor = [ 2, 1, 2, 2, 1, 2 ];
+
+var strings = [ 4, 11, 7, 2, 9, 4 ];
+
+var harmonization = [ 'M', 'm', 'm', 'M', 'G', 'm' ];
+
+
+function getMajorScale(tonic) {
+	var current_note = tonic;
+	var ns = [ current_note ];
+	for(var i = 0; i < 6; i++) {
+	    current_note = (current_note + major[i]) % 12;
+		ns.push(current_note);
+	}
+	return ns;
+}
+
+function getMinorScale(tonic) {
+	var current_note = tonic;
+	var ns = [ current_note ];
+	for(var i = 0; i < 6; i++) {
+	    current_note = (current_note + minor[i]) % 12;
+		ns.push(current_note);
+	}
+	return ns;
+}
+
+function getMajorChordNotes(tonic) {
+	var major_scale = getMajorScale(tonic);
+	return [ notes[major_scale[0]], notes[major_scale[2]], notes[major_scale[4]] ];
+}
+
+function getMinorChordNotes(tonic) {
+	var major_scale = getMinorScale(tonic);
+	return [ notes[major_scale[0]], notes[major_scale[1]], notes[major_scale[4]] ];
+}
+
+function makeNote(n, idx, capo = false) {
+	var $note = $("<div class=\"note\"><span>" + notes[n] + "</span></div>");	
+	if(!capo) {					
+		$note.addClass(bords[idx]);
+	}
+	$note.addClass(colors[idx]);
+	return $note;
+}
+
+function makeFreatboard(tonic) {
+
+	$(".fretboards").empty();
+	
+	tonic = notes.indexOf(tonic);
+	
+	var scale = getMajorScale(tonic);
+
+	for(var h = 0; h < 1; h++) {
+		tonic = scale[h];
+		
+		var $fbdiv = $("<div/>");
+
+		
+		var $fb = $("<div/>").addClass("fretboard");
+		for(var i= 0; i < 16; i++) {
+			var $fret = $("<div class=\"fret\"></div>");
+			for(var j = 0; j < 6; j++) {
+				let n = (strings[j] + i) % 12;
+				if(scale.includes(n)) {
+					$fret.append(makeNote(n, scale.indexOf(n), i === 0));
+				} else {
+					$fret.append('<div class="nonote"></div>');
+				}
+			}
+			
+			
+			var $div = $("<div></div>").append($fret).append('<div class="fretnum">' + (i) + '</div>');
+			$fb.append($div);
+		}
+		$fbdiv.append($fb);
+		$(".fretboards").append($fbdiv);
+	}
+	
+	var $chords = $(".chords");
+	$chords.empty();
+	
+	for(var i = 0; i < 6; i++) {
+		var h = harmonization[i];
+		var tonic = scale[i];
+		var $chord = $("<div/>").addClass("chord");
+		var chord, _scale;
+		if(h === 'M')
+			_scale = getMajorScale(tonic);
+		else if(harmonization[i] === 'm')
+			_scale = getMinorScale(tonic);
+		
+		console.log(notes[tonic], _scale );
+		chord = [ _scale[0], _scale[2], _scale[4] ];
+		
+		var $chord_name = $("<div><span>" + notes[tonic] + (h === 'm' ? 'm' : '') + "</span></div>").addClass("chord_name"); 
+		$chord.append($chord_name);
+		for(var j = 0; j < 3; j++) {
+			$chord.append(makeNote(chord[j], scale.indexOf(chord[j])));
+		}
+		$chords.append($chord);
+	}
+	
+}
+
+makeFreatboard("C");
+
+</script>
+
+</body>
+
+</html>
